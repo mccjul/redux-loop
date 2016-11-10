@@ -170,3 +170,19 @@ test('Effects.call', (t) => {
       t.end();
     });
 });
+
+test('Effects.GEN_PROMISE', (t) => {
+  const Effect = Effects.generator(function*(){
+      return { type: 'GEN_PROMISE', name:'hello' };
+  });
+
+  effectToPromise(Effect)
+    .then(([action]) => {
+      t.deepEqual(
+        action,
+        { type: 'GEN_PROMISE', name: 'hello' },
+        'the action takes the proper shape for a Generator action'
+      );
+      t.end();
+    });
+});

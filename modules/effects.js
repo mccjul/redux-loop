@@ -1,10 +1,12 @@
 import { throwInvariant, flatten } from './utils';
+import promisify from 'promisify-any';
 
 const isEffectSymbol = Symbol('isEffect');
 
 const effectTypes = {
   PROMISE: 'PROMISE',
   CALL: 'CALL',
+  GEN_PROMISE: 'GEN_PROMISE',
   BATCH: 'BATCH',
   CONSTANT: 'CONSTANT',
   NONE: 'NONE',
@@ -30,6 +32,8 @@ export function effectToPromise(effect) {
       return effect.factory(...effect.args).then((action) => [action]);
     case effectTypes.CALL:
       return Promise.resolve([effect.factory(...effect.args)]);
+    case effectTypes.GEN_PROMISE:
+      return promisify(effect.factory)().then((action) => [action]);
     case effectTypes.BATCH:
       return Promise.all(effect.effects.map(effectToPromise)).then(flatten);
     case effectTypes.CONSTANT:
@@ -87,6 +91,19 @@ export function promise(factory, ...args) {
 }
 
 /**
+ * Creates an effect for a generator function that returns a Promise.
+ * @param {Function*} factory The function to invoke without any args and returns a Promise for an action.
+ * @returns {Object} The wrapped effect of type PROMISE.
+ */
+export function generator(factory) {
+  return {
+    factory,
+    type: effectTypes.GEN_PROMISE,
+    [isEffectSymbol]: true
+  };
+}
+
+/**
  * Creates an effect for a function that returns an action.
  * @param {Function} factory The function to invoke with the given args that returns an action.
  * @returns {Object} The wrapped effect of type CALL.
@@ -99,6 +116,7 @@ export function call(factory, ...args) {
     [isEffectSymbol]: true
   };
 }
+
 
 /**
  * Composes an array of effects together.
