@@ -92,13 +92,12 @@ export function promise(factory, ...args) {
 
 /**
  * Creates an effect for a generator function that returns a Promise.
- * @param {Function*} factory The function to invoke with the given args that returns a Promise for an action.
+ * @param {Function*} factory The function to invoke without any args and returns a Promise for an action.
  * @returns {Object} The wrapped effect of type PROMISE.
  */
-export function generator(factory, ...args) {
+export function generator(factory) {
   return {
     factory,
-    args,
     type: effectTypes.GEN_PROMISE,
     [isEffectSymbol]: true
   };

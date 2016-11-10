@@ -174,7 +174,7 @@ test('Effects.call', (t) => {
 test('Effects.GEN_PROMISE', (t) => {
   const Effect = Effects.generator(function*(){
       return { type: 'GEN_PROMISE', name:'hello' };
-  }, 'hello');
+  });
 
   effectToPromise(Effect)
     .then(([action]) => {
